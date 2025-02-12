@@ -4,9 +4,9 @@ Esta é uma API construída com Express e SQL Server para consultar revendas usa
 
 ## Funcionalidades
 
-- **Consulta de Revendas**: A API permite que você consulte informações sobre uma revenda através do seu Documento de identificação (seja ele CNPJ, CPF ou documento alfanumérico (para clientes do exterior)). O documento pode ser fornecido com ou sem pontuação. A consulta é realizada em um banco de dados **SQL Server**, que contém os dados das revendas, como nome, razão social, tipo de suporte, categoria, estado e observações.
-- **Logs**: A API mantém um log das consultas realizadas, com informações sobre as consultas feitas e erros.
-- **Limpeza de Logs**: A API oferece um endpoint para limpar os logs armazenados.
+- **Consulta de Revendas**: permite que você consulte informações sobre uma revenda através do seu Documento de identificação (seja ele CNPJ, CPF ou documento alfanumérico (para clientes do exterior)). O documento pode ser fornecido com ou sem pontuação. A consulta é realizada em um banco de dados **SQL Server**, que contém os dados das revendas, como nome, razão social, tipo de suporte, categoria, estado e observações.
+- **Logs**: mantém um log das consultas realizadas, com informações sobre as consultas feitas e erros.
+- **Limpeza de Logs**: oferece um endpoint para limpar os logs armazenados.
 
 ## Requisitos
 
