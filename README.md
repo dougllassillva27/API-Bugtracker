@@ -1,6 +1,6 @@
 # API de Consulta de Revendas
 
-Esta é uma API simples construída com Express e SQL Server para consultar revendas usando o CNPJ. Ela também mantém um log das consultas e oferece endpoints para visualizar e limpar os logs.
+Esta é uma API construída com Express e SQL Server para consultar revendas usando o CNPJ. Ela também mantém um log das consultas e oferece endpoints para visualizar e limpar os logs.
 
 ## Funcionalidades
 
