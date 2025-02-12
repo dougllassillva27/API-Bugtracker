@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const sql = require("mssql");
 const app = express();
-const port = process.env.PORT || 10000;
+const port = process.env.PORT || 10001;
 
 // Configuração do banco de dados
 const dbConfig = {
