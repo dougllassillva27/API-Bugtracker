@@ -58,7 +58,7 @@ app.get("/revendas/:documento(*)", async (req, res) => {
 
     // Verifica se o CNPJ é alfanumérico. Se for, mantém a pontuação
     const documentoSemPontuacao = isAlfanumero(documento)
-      ? documento // Mantém o CNPJ como está se for alfanumérico
+      ? documento // Mantém o CNPJ alfanumérico
       : limparDocumento(documento); // Remove pontuação se não for alfanumérico
 
     // Verifica se o documento resultante contém apenas números e tem o tamanho correto
@@ -68,22 +68,25 @@ app.get("/revendas/:documento(*)", async (req, res) => {
     }
 
     // Log para verificar o valor do CNPJ antes de fazer a consulta
-    logToServer(`Consultando CNPJ: ${documentoSemPontuacao}`);
+    logToServer(`Consultando CNPJ: ${documento}`);
 
-    // Consulta o banco de dados, usando o CNPJ formatado ou alfanumérico
+    // Consulta no banco de dados, usando o CNPJ alfanumérico
     const result =
       await sql.query`SELECT Nome, [Razao Social], [CNPJ/doc], [Atendimento de Suporte], [Tipo Suporte], [Categoria], [Estado], [Mobuss], Obs FROM v_revendas_bugtracker WHERE [CNPJ/doc] = ${documentoSemPontuacao}`;
 
+    // Caso tenha encontrado o CNPJ no banco de dados
     if (result.recordset.length > 0) {
       result.recordset = result.recordset.map((item) => ({
         ...item,
-        CNPJ_Formatado: formatCNPJ(item["CNPJ/doc"]),
+        CNPJ_Comex: isAlfanumero(documento) ? documento : null, // Exibe o CNPJ original alfanumérico na resposta
+        "CNPJ/doc": limparDocumento(item["CNPJ/doc"]), // Exibe o CNPJ sem pontuação no campo "CNPJ/doc"
+        CNPJ_Formatado: formatCNPJ(limparDocumento(item["CNPJ/doc"])), // Exibe o CNPJ formatado no campo "CNPJ_Formatado"
         CNPJ_encontrado: true,
       }));
-      logToServer(`CNPJ encontrado: ${documentoSemPontuacao}`);
+      logToServer(`CNPJ encontrado: ${documento}`);
       return res.json(result.recordset);
     } else {
-      logToServer(`CNPJ não encontrado: ${documentoSemPontuacao}`);
+      logToServer(`CNPJ não encontrado: ${documento}`);
       return res.json({ CNPJ_encontrado: false });
     }
   } catch (err) {
