@@ -8,10 +8,10 @@ const port = process.env.PORT || 10001;
 const dbConfig = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER, // Exemplo: localhost ou IP
+  server: process.env.DB_SERVER,
   database: process.env.DB_DATABASE,
   options: {
-    encrypt: false, // Defina como true se estiver usando Azure
+    encrypt: false,
     enableArithAbort: true,
   },
 };
@@ -38,12 +38,16 @@ function isAlfanumero(cnpj) {
 }
 
 // Logs em memória
-let logs = []; // Array para armazenar logs temporários
+let logs = [];
 
-// Função para adicionar logs
+// Função para adicionar logs com horário de Brasília
 function logToServer(message) {
-  logs.push({ message, timestamp: new Date() }); // Adiciona um timestamp para os logs
-  // Limita a 100 logs, removendo o mais antigo caso o número de logs ultrapasse esse limite
+  const timestamp = new Date().toLocaleString("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+  }); // Ajuste de fuso horário
+  logs.push({ message, timestamp });
+
+  // Limita a 100 logs
   if (logs.length > 100) {
     logs.shift();
   }
@@ -61,16 +65,16 @@ app.get("/revendas/:documento(*)", async (req, res) => {
       ? documento // Mantém o CNPJ alfanumérico
       : limparDocumento(documento); // Remove pontuação se não for alfanumérico
 
-    // Verifica se o documento resultante contém apenas números e tem o tamanho correto
+    // Verifica se o documento contém apenas números e tem o tamanho correto
     if (!/^\d{4,14}$/.test(documentoSemPontuacao) && !isAlfanumero(documento)) {
       logToServer(`CNPJ não encontrado: ${documento}`);
       return res.json({ CNPJ_encontrado: false });
     }
 
-    // Log para verificar o valor do CNPJ antes de fazer a consulta
+    // Log para registrar a consulta
     logToServer(`Consultando CNPJ: ${documento}`);
 
-    // Consulta no banco de dados, usando o CNPJ alfanumérico
+    // Consulta no banco de dados utilizando o CNPJ sem pontuação
     const result =
       await sql.query`SELECT Nome, [Razao Social], [CNPJ/doc], [Atendimento de Suporte], [Tipo Suporte], [Categoria], [Estado], [Mobuss], Obs FROM v_revendas_bugtracker WHERE [CNPJ/doc] = ${documentoSemPontuacao}`;
 
@@ -81,11 +85,12 @@ app.get("/revendas/:documento(*)", async (req, res) => {
         CNPJ_Comex: isAlfanumero(documento) ? documento : null, // Exibe o CNPJ original alfanumérico na resposta
         "CNPJ/doc": limparDocumento(item["CNPJ/doc"]), // Exibe o CNPJ sem pontuação no campo "CNPJ/doc"
         CNPJ_Formatado: formatCNPJ(limparDocumento(item["CNPJ/doc"])), // Exibe o CNPJ formatado no campo "CNPJ_Formatado"
-        CNPJ_encontrado: true,
+        CNPJ_encontrado: true, // Indica que o CNPJ foi encontrado
       }));
       logToServer(`CNPJ encontrado: ${documento}`);
       return res.json(result.recordset);
     } else {
+      // Caso o CNPJ não seja encontrado no banco
       logToServer(`CNPJ não encontrado: ${documento}`);
       return res.json({ CNPJ_encontrado: false });
     }
@@ -100,14 +105,13 @@ app.get("/revendas/:documento(*)", async (req, res) => {
 
 // Endpoint para retornar os logs
 app.get("/logs", (req, res) => {
-  // Impede cache no navegador
   res.header("Cache-Control", "no-cache, no-store, must-revalidate");
-  res.json({ logs }); // Retorna os logs mais recentes
+  res.json({ logs });
 });
 
 // Endpoint para limpar os logs
 app.delete("/logs", (req, res) => {
-  logs = []; // Limpa todos os logs
+  logs = [];
   res.json({ message: "Logs limpos com sucesso" });
 });
 
