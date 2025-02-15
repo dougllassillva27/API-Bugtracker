@@ -17,6 +17,11 @@ Esta é uma API construída com Express e SQL Server para consultar revendas usa
 - **Logs**: mantém um log das últimas 100 consultas realizadas, com informações sobre as consultas feitas e erros.
 - **Limpeza de Logs**: oferece um endpoint para limpar os logs armazenados.
 
+### **Endpoints**
+
+- /revendas/(cnpj): endpoint para consulta da revenda passando o documento da mesma (seja ele CPNJ, CPF ou alfanumérico) e usando o método **GET**.
+- /logs: endpoint para consulta de logs dos últimos 100 documentos pesquisados na API, essa rota suporta o método **GET** para consultar e **DELETE** para apagar os logs.
+
 ### **Tecnologias Utilizadas**
 
 - [Node.js](https://nodejs.org/) (versão 14 ou superior)
