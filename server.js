@@ -21,7 +21,10 @@ app.use(express.json());
 
 // Função para formatar o CNPJ
 function formatCNPJ(cnpj) {
-    return cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5");
+    return cnpj.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        "$1.$2.$3/$4-$5"
+    );
 }
 
 // Função para remover a pontuação do CNPJ
@@ -39,7 +42,9 @@ let logs = [];
 
 // Função para adicionar logs com horário de Brasília
 function logToServer(message) {
-    const timestamp = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }); // Ajuste de fuso horário
+    const timestamp = new Date().toLocaleString("pt-BR", {
+        timeZone: "America/Sao_Paulo",
+    }); // Ajuste de fuso horário
     logs.push({ message, timestamp });
 
     // Limita a 100 logs
@@ -53,7 +58,22 @@ app.get("/revendas/:documento(*)", async (req, res) => {
     try {
         await sql.connect(dbConfig);
 
-        const documento = req.params.documento;
+        let documento = req.params.documento.trim();
+
+        // Divide o texto em linhas
+        const linhas = documento.split(/\r?\n/);
+
+        // Procura a primeira linha que contém um possível CNPJ
+        for (const linha of linhas) {
+            const cnpjLimpo = limparDocumento(linha);
+
+            // Aceita CNPJs entre 4 e 14 dígitos
+            if (/^\d{4,14}$/.test(cnpjLimpo)) {
+                documento = cnpjLimpo;
+                break;
+            }
+        }
+
 
         // Verifica se o CNPJ é alfanumérico. Se for, mantém a pontuação
         const documentoSemPontuacao = isAlfanumero(documento)
