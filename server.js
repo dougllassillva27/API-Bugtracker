@@ -60,59 +60,54 @@ app.get("/revendas/:documento(*)", async (req, res) => {
 
         let documento = req.params.documento.trim();
 
-        // Divide o texto em linhas
+        // Divide o texto em linhas (considerando 2 linhas)
         const linhas = documento.split(/\r?\n/);
 
-        // Procura a primeira linha que contém um possível CNPJ
-        for (const linha of linhas) {
-            const cnpjLimpo = limparDocumento(linha);
+        // Se existirem 2 linhas, a segunda linha deve ser o CNPJ
+        const cnpjOriginal = linhas.length === 2 ? linhas[1].trim() : linhas[0].trim();
 
-            // Aceita CNPJs entre 4 e 14 dígitos
-            if (/^\d{4,14}$/.test(cnpjLimpo)) {
-                documento = cnpjLimpo;
-                break;
-            }
-        }
+        // Verifica se o CNPJ é alfanumérico
+        const documentoEhAlfanumerico = isAlfanumero(cnpjOriginal);
 
+        // Se for alfanumérico, consulta o banco exatamente como foi enviado
+        const documentoParaConsulta = documentoEhAlfanumerico
+            ? cnpjOriginal
+            : limparDocumento(cnpjOriginal); // Caso contrário, converte para consulta no banco
 
-        // Verifica se o CNPJ é alfanumérico. Se for, mantém a pontuação
-        const documentoSemPontuacao = isAlfanumero(documento)
-            ? documento // Mantém o CNPJ alfanumérico
-            : limparDocumento(documento); // Remove pontuação se não for alfanumérico
+        // Log para registrar a consulta antes da busca
+        logToServer(`Consultando CNPJ: ${documentoParaConsulta}`);
 
-        // Verifica se o documento contém apenas números e tem o tamanho correto
-        if (!/^\d{4,14}$/.test(documentoSemPontuacao) && !isAlfanumero(documento)) {
-            logToServer(`CNPJ não encontrado: ${documento}`);
-            return res.json({ CNPJ_encontrado: false });
-        }
-
-        // Log para registrar a consulta
-        logToServer(`Consultando CNPJ: ${documento}`);
-
-        // Consulta no banco de dados utilizando o CNPJ sem pontuação
+        // Consulta no banco de dados utilizando o CNPJ EXATAMENTE como recebido
         const result =
-            await sql.query`SELECT Nome, [Razao Social], [CNPJ/doc], [Atendimento de Suporte], [Tipo Suporte], [Categoria], [Estado], [Mobuss], Obs FROM v_revendas_bugtracker WHERE [CNPJ/doc] = ${documentoSemPontuacao}`;
+            await sql.query`SELECT Nome, [Razao Social], [CNPJ/doc], [Atendimento de Suporte], [Tipo Suporte], [Categoria], [Estado], [Mobuss], Obs FROM v_revendas_bugtracker WHERE [CNPJ/doc] = ${documentoParaConsulta}`;
 
         // Caso tenha encontrado o CNPJ no banco de dados
         if (result.recordset.length > 0) {
             result.recordset = result.recordset.map((item) => ({
                 ...item,
-                CNPJ_Comex: isAlfanumero(documento) ? documento : null, // Exibe o CNPJ original alfanumérico na resposta
+                CNPJ_Comex: documentoEhAlfanumerico ? cnpjOriginal : null, // Exibe o CNPJ original alfanumérico na resposta
                 "CNPJ/doc": limparDocumento(item["CNPJ/doc"]), // Exibe o CNPJ sem pontuação no campo "CNPJ/doc"
                 CNPJ_Formatado: formatCNPJ(limparDocumento(item["CNPJ/doc"])), // Exibe o CNPJ formatado no campo "CNPJ_Formatado"
                 CNPJ_encontrado: true, // Indica que o CNPJ foi encontrado
             }));
-            logToServer(`CNPJ encontrado: ${documento}`);
+            logToServer(`CNPJ encontrado: ${documentoParaConsulta}`);
             return res.json(result.recordset);
         } else {
             // Caso o CNPJ não seja encontrado no banco
-            logToServer(`CNPJ não encontrado: ${documento}`);
+            logToServer(`CNPJ não encontrado: ${documentoParaConsulta}`);
             return res.json({ CNPJ_encontrado: false });
         }
     } catch (err) {
         console.error("Erro na consulta:", err.message);
         logToServer(`Erro na consulta: ${err.message}`);
-        res.status(500).send(err.message);
+
+        // Captura erro de timeout e retorna 400 Bad Request
+        if (err.code === "ETIMEOUT") {
+            return res.status(400).json({ erro: "Tempo limite da solicitação excedido" });
+        }
+
+        // Retorna erro interno do servidor para outras falhas
+        return res.status(500).send("Erro interno do servidor");
     } finally {
         sql.close();
     }
