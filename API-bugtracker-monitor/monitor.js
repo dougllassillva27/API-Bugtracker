@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { Client, GatewayIntentBits } = require("discord.js");
 const axios = require("axios");
+const express = require("express");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -13,6 +14,9 @@ const apiKeyOctadesk = process.env.API_OCTADESK_KEY; // Chave API Octadesk
 
 let api1WasDown = false; // Estado da API Bugtracker
 let api2WasDown = false; // Estado da API Octadesk
+
+let api1Status = false; // Estado atual da API Bugtracker
+let api2Status = false; // Estado atual da API Octadesk
 
 // Função para verificar a API Bugtracker
 async function checkAPI1() {
@@ -53,10 +57,13 @@ async function sendMessage(message) {
 client.once("ready", () => {
   console.log("Bot conectado ao Discord!");
 
-  // Verificação periódica a cada 1 minuto
+  // Verificação periódica a cada 10 segundos
   setInterval(async () => {
     const isApi1Up = await checkAPI1();
     const isApi2Up = await checkAPI2();
+
+    api1Status = isApi1Up; // Atualiza o status da API Bugtracker
+    api2Status = isApi2Up; // Atualiza o status da API Octadesk
 
     // Monitoramento da API Bugtracker
     if (!isApi1Up) {
@@ -87,7 +94,24 @@ client.once("ready", () => {
         api2WasDown = false;
       }
     }
-  }, 60 * 1000); // Intervalo de 1 minuto
+  }, 10 * 1000); // Intervalo de 10 segundos
+});
+
+// Inicia o servidor Express para expor o endpoint de status
+const app = express();
+const port = process.env.MONITOR_PORT || 10001; // Define a porta do monitor
+
+// Endpoint de status
+app.get("/status", (req, res) => {
+  res.json({
+    Bugtracker: api1Status,
+    Octadesk: api2Status,
+  });
+});
+
+// Inicia o servidor
+app.listen(port, () => {
+  console.log(`Servidor de monitoramento rodando em http://localhost:${port}`);
 });
 
 // Login do bot
