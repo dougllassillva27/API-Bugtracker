@@ -39,9 +39,10 @@ Esta é uma API construída com Express e SQL Server para consultar revendas usa
   - **API Octadesk**
 - Envia mensagens para um canal no Discord notificando sobre o status das APIs.
 - Verifica o status das APIs a cada 1 minuto.
-- Notifica o canal do Discord quando alguma das APIs fica com o status offline e quando volta online.
+- Notifica o canal do Discord quando alguma das APIs fica com o status offline e quando volta online, juntamente com o tempo em que ficou offline.
 
 ### **Endpoints**
+
 - /status: para consulta dos status das APIs.
 
 ### **Tecnologias Utilizadas**
