@@ -42,7 +42,7 @@ Esta é uma API construída com Express e SQL Server para consultar revendas usa
 - Notifica o canal do Discord quando alguma das APIs fica com o status offline e quando volta online.
 
 ### **Endpoints**
-- /status: para consulta do status das APIs
+- /status: para consulta dos status das APIs.
 
 ### **Tecnologias Utilizadas**
 
