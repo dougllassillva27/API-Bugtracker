@@ -43,7 +43,7 @@ Esta é uma API construída com Express e SQL Server para consultar revendas usa
 
 ### **Endpoints**
 
-- /status: para consulta dos status das APIs.
+- /status: Retorna o status das APIs monitoradas, indicando se estão online ou offline. O status é atualizado automaticamente sempre que uma API fica indisponível e também quando ela retorna ao funcionamento normal.
 
 ### **Tecnologias Utilizadas**
 

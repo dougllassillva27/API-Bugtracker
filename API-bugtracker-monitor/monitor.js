@@ -4,7 +4,11 @@ const axios = require("axios");
 const express = require("express");
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 const apiUrl1 = process.env.API_URL1; // API Bugtracker
@@ -100,7 +104,7 @@ client.on("messageCreate", async (message) => {
 client.once("ready", () => {
   console.log("Bot conectado ao Discord!");
 
-  // Verificação periódica a cada 10 segundos
+  // Verificação periódica a cada 15 segundos
   setInterval(async () => {
     const isApi1Up = await checkAPI1();
     const isApi2Up = await checkAPI2();
@@ -120,7 +124,9 @@ client.once("ready", () => {
       if (api1WasDown) {
         const downtimeDuration = calculateDowntime(api1DownTime);
         console.log("✅ API Bugtracker voltou a funcionar!");
-        await sendMessage(`✅ **API Bugtracker está online novamente!** Ela ficou inativa ${downtimeDuration}`);
+        await sendMessage(
+          `✅ **API Bugtracker está online novamente!** Ela ficou inativa ${downtimeDuration}`
+        );
         api1WasDown = false;
         api1DownTime = null; // Reseta o horário de queda
       }
@@ -138,12 +144,14 @@ client.once("ready", () => {
       if (api2WasDown) {
         const downtimeDuration = calculateDowntime(api2DownTime);
         console.log("✅ API Octadesk voltou a funcionar!");
-        await sendMessage(`✅ **API Octadesk está online novamente!** Ela ficou inativa por ${downtimeDuration}`);
+        await sendMessage(
+          `✅ **API Octadesk está online novamente!** Ela ficou inativa por ${downtimeDuration}`
+        );
         api2WasDown = false;
         api2DownTime = null; // Reseta o horário de queda
       }
     }
-  }, 10 * 1000); // Intervalo de 10 segundos
+  }, 15 * 1000); // Intervalo de 15 segundos
 });
 
 // Função para calcular o tempo de inatividade
@@ -156,7 +164,6 @@ function calculateDowntime(downTime) {
 
   return `${diffHours} horas, ${diffMinutes} minutos e ${diffSeconds} segundos`;
 }
-
 
 // Inicia o servidor Express para expor o endpoint de status
 const app = express();
