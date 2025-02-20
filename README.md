@@ -57,6 +57,11 @@ Esta é uma API construída com Express e SQL Server para consultar revendas usa
 # Instalação
 
 1. Clone o repositório ou baixe o código para sua máquina.
+
+```bash
+git clone https://github.com/dougllassillva27/API-Bugtracker.git
+```
+
 2. Instale as dependências necessárias:
 
 ```bash
