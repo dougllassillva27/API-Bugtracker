@@ -1,7 +1,9 @@
 .env/
 node_modules/
+Páginas/
 .vscode/
 .env
 Exemplo requisição octa/curl --request POST.txt
 package.json
 package-lock.json
+
