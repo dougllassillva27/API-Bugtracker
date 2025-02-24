@@ -43,11 +43,6 @@ async function checkAPI2() {
     });
     return response.status === 200;
   } catch (error) {
-    // Verifica se o erro é de timeout
-    if (error.code === 'ECONNABORTED') {
-      console.log('🚨 Timeout atingido! A API Octadesk não respondeu em 60 segundos.');
-      await sendMessage('🚨 **API Octadesk está offline (timeout de 60 segundos)!** @everyone');
-    }
     return false;
   }
 }
@@ -135,25 +130,26 @@ client.once('ready', () => {
     // Monitoramento da API Octadesk
     if (!isApi2Up) {
       if (!api2WasDown) {
-        api2DownTime = new Date(); // Salva o horário em que a API Octadesk caiu
+        // Primeira vez que a API 2 caiu, armazena o horário
+        api2DownTime = new Date();
         console.log('🚨 API Octadesk está fora do ar!');
-        await sendMessage('🚨 **API Octadesk está fora do ar!** @everyone');
-        api2WasDown = true;
-      } else {
-        // Verifica se passou mais de 60 segundos desde que a API caiu
-        const downtimeDuration = calculateDowntime(api2DownTime);
-        if (downtimeDuration >= 60) {
-          console.log(`🚨 API Octadesk continua offline há ${downtimeDuration} segundos`);
-          await sendMessage(`🚨 **API Octadesk está offline há mais de 60 segundos!** @everyone`);
-        }
+        api2WasDown = true; // Marca que a API caiu
       }
     } else {
       if (api2WasDown) {
-        const downtimeDuration = calculateDowntime(api2DownTime);
-        console.log('✅ API Octadesk voltou a funcionar!');
-        await sendMessage(`✅ **API Octadesk está online novamente!** Ela ficou inativa por ${downtimeDuration}`);
-        api2WasDown = false;
-        api2DownTime = null; // Reseta o horário de queda
+        // A API 2 voltou após estar fora
+        const downtimeDuration = calculateDowntime(api2DownTime); // Calcula o tempo de inatividade
+        if (downtimeDuration >= 1) {
+          // Se ficou offline por pelo menos 60 segundos
+          console.log(`✅ API Octadesk voltou! Ela ficou offline por ${downtimeDuration} minutos.`);
+          await sendMessage(
+            `✅ **API Octadesk está online novamente!** Ela ficou inativa por ${downtimeDuration} minutos.`
+          );
+        } else {
+          console.log('API Octadesk voltou antes de 60 segundos, sem notificação.');
+        }
+        api2WasDown = false; // Reseta o estado de queda
+        api2DownTime = null; // Reseta a hora da queda
       }
     }
   }, 15 * 1000); // Intervalo de 15 segundos
