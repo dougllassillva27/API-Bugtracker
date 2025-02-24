@@ -135,10 +135,17 @@ client.once('ready', () => {
     // Monitoramento da API Octadesk
     if (!isApi2Up) {
       if (!api2WasDown) {
-        console.log('🚨 API Octadesk está fora do ar!');
         api2DownTime = new Date(); // Salva o horário em que a API Octadesk caiu
+        console.log('🚨 API Octadesk está fora do ar!');
         await sendMessage('🚨 **API Octadesk está fora do ar!** @everyone');
         api2WasDown = true;
+      } else {
+        // Verifica se passou mais de 60 segundos desde que a API caiu
+        const downtimeDuration = calculateDowntime(api2DownTime);
+        if (downtimeDuration >= 60) {
+          console.log(`🚨 API Octadesk continua offline há ${downtimeDuration} segundos`);
+          await sendMessage(`🚨 **API Octadesk está offline há mais de 60 segundos!** @everyone`);
+        }
       }
     } else {
       if (api2WasDown) {
