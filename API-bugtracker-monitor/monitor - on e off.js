@@ -1,6 +1,29 @@
-require("dotenv").config();
-const { Client, GatewayIntentBits } = require("discord.js");
-const axios = require("axios");
+/*
+MIT License
+
+Copyright (c) 2025 Douglas Silva
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+require('dotenv').config();
+const { Client, GatewayIntentBits } = require('discord.js');
+const axios = require('axios');
 
 // Inicializar o bot
 const client = new Client({
@@ -27,8 +50,8 @@ async function checkAPI2() {
   try {
     const response = await axios.get(`${apiUrl2}/chat?sort[direction]=asc`, {
       headers: {
-        accept: "application/json",
-        "X-API-KEY": apiKeyOctadesk,
+        accept: 'application/json',
+        'X-API-KEY': apiKeyOctadesk,
       },
     });
     return response.status === 200;
@@ -43,13 +66,13 @@ async function sendMessage(message) {
     const channel = await client.channels.fetch(channelId);
     await channel.send(message);
   } catch (err) {
-    console.error("Erro ao enviar mensagem:", err);
+    console.error('Erro ao enviar mensagem:', err);
   }
 }
 
 // Evento de quando o bot estiver pronto
-client.once("ready", () => {
-  console.log("Bot conectado ao Discord!");
+client.once('ready', () => {
+  console.log('Bot conectado ao Discord!');
 
   // Verificação periódica a cada 1 minuto
   setInterval(async () => {
@@ -58,20 +81,20 @@ client.once("ready", () => {
 
     // Verificar o status da primeira API (Bugtracker)
     if (isApi1Up) {
-      console.log("✅ API Bugtracker está funcionando corretamente.");
-      await sendMessage("✅ **API Bugtracker está funcionando corretamente!**");
+      console.log('✅ API Bugtracker está funcionando corretamente.');
+      await sendMessage('✅ **API Bugtracker está funcionando corretamente!**');
     } else {
-      console.log("🚨 API Bugtracker está fora do ar!");
-      await sendMessage("🚨 **API Bugtracker está fora do ar!** @everyone");
+      console.log('🚨 API Bugtracker está fora do ar!');
+      await sendMessage('🚨 **API Bugtracker está fora do ar!** @everyone');
     }
 
     // Verificar o status da segunda API (Octadesk)
     if (isApi2Up) {
-      console.log("✅ API Octadesk está funcionando corretamente.");
-      await sendMessage("✅ **API Octadesk está funcionando corretamente!**");
+      console.log('✅ API Octadesk está funcionando corretamente.');
+      await sendMessage('✅ **API Octadesk está funcionando corretamente!**');
     } else {
-      console.log("🚨 API Octadesk está fora do ar!");
-      await sendMessage("🚨 **API Octadesk está fora do ar!** @everyone");
+      console.log('🚨 API Octadesk está fora do ar!');
+      await sendMessage('🚨 **API Octadesk está fora do ar!** @everyone');
     }
   }, 60 * 1000); // Intervalo de 1 minuto
 });

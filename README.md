@@ -1,5 +1,7 @@
 # **API de Consulta de Revendas & Monitoramento de APIs com Discord Bot**
 
+![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
+
 Este repositório contém dois projetos distintos:
 
 1. **API de Consulta de Revendas**: Uma API construída com Express e SQL Server para consultar revendas usando um documento de identificação (CNPJ, CPF, ou documento alfanumérico) e gerenciar logs das consultas.
