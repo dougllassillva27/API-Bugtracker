@@ -66,6 +66,16 @@ function isAlfanumero(cnpj) {
   return /[a-zA-Z]/.test(cnpj); // Verifica se há letras no CNPJ
 }
 
+// Nova função para extrair CNPJ de texto corrido
+function extrairCNPJ(texto) {
+  const cnpjRegex = /\b\d{14}\b|\b\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}\b/;
+  const match = texto.match(cnpjRegex);
+  if (match) {
+    return limparDocumento(match[0]); // Retorna o CNPJ limpo (apenas dígitos)
+  }
+  return null; // Retorna null se não encontrar um CNPJ válido
+}
+
 // Logs em memória
 let logs = [];
 
@@ -100,11 +110,18 @@ app.get('/revendas/:documento(*)', async (req, res) => {
 
     let documento = req.params.documento.trim();
 
-    // Divide o texto em linhas (considerando 2 linhas)
-    const linhas = documento.split(/\r?\n/);
+    // Tenta extrair um CNPJ válido do texto corrido
+    const cnpjExtraido = extrairCNPJ(documento);
+    let cnpjOriginal;
 
-    // Se existirem 2 linhas, a segunda linha deve ser o CNPJ
-    const cnpjOriginal = linhas.length === 2 ? linhas[1].trim() : linhas[0].trim();
+    if (cnpjExtraido) {
+      cnpjOriginal = cnpjExtraido; // Usa o CNPJ extraído
+    } else {
+      // Divide o texto em linhas (considerando 2 linhas)
+      const linhas = documento.split(/\r?\n/);
+      // Se existirem 2 linhas, a segunda linha deve ser o CNPJ
+      cnpjOriginal = linhas.length === 2 ? linhas[1].trim() : linhas[0].trim();
+    }
 
     // Verifica se o CNPJ é alfanumérico
     const documentoEhAlfanumerico = isAlfanumero(cnpjOriginal);
